@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSignal LED - Señalización Vial Solar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0f19; color: #e2e8f0; line-height: 1.6; padding-bottom: 50px; }
+        header { background: linear-gradient(135deg, #0d1b2a, #1b263b); color: #fff; text-align: center; padding: 40px 20px; border-bottom: 3px solid #00f2fe; }
+        header h1 { font-size: 2.2rem; margin-bottom: 10px; color: #00f2fe; }
+        header p { font-size: 1rem; color: #94a3b8; }
+        
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        
+        .canvas-container { position: relative; width: 100%; max-width: 900px; margin: 20px auto; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,242,254,0.2); border: 1px solid #1e293b; }
+        canvas { display: block; width: 100%; height: auto; }
+        
+        .controls { background: #1e293b; padding: 15px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 15px; border-top: 1px solid #334155; }
+        .controls label { font-weight: bold; color: #38bdf8; }
+        
+        .section-title { font-size: 1.6rem; color: #00f2fe; margin: 30px 0 15px 0; border-bottom: 2px solid #334155; padding-bottom: 8px; }
+        
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card { background: #1e293b; border-radius: 10px; padding: 20px; border-left: 4px solid #00f2fe; }
+        .card h3 { color: #38bdf8; margin-bottom: 8px; }
+        
+        .scope-box { background: #1b263b; border-radius: 10px; padding: 20px; border: 1px solid #415a77; }
+        .scope-box ul { margin-left: 20px; margin-top: 10px; }
+        .scope-box li { margin-bottom: 8px; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>EcoSignal LED - Sistema Vial Solar</h1>
+    <p>Señales de tránsito con iluminación LED autónoma recargada por paneles solares</p>
+</header>
+
+<div class="container">
+    <div class="canvas-container">
+        <canvas id="roadCanvas" width="800" height="400"></canvas>
+        <div class="controls">
+            <label for="timeSlider">Día / Noche:</label>
+            <input type="range" id="timeSlider" min="0" max="100" value="80" style="width: 150px;">
+            <span id="timeLabel" style="color: #cbd5e1; font-weight: bold;">Noche</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">Alcance del Proyecto</h2>
+    <div class="scope-box">
+        <p>El proyecto <strong>EcoSignal LED</strong> aborda la necesidad de mejorar la visibilidad y seguridad vial nocturna mediante la implementación de señales de tránsito luminosas autosustentables.</p>
+        <ul>
+            <li><strong>Autonomía Energética:</strong> Operación 100% independiente de la red eléctrica gracias a módulos fotovoltaicos.</li>
+            <li><strong>Control Inteligente:</strong> Sensor fotocelda (LDR) para encendido automático al disminuir la luz solar.</li>
+            <li><strong>Visibilidad de Alto Impacto:</strong> Diodos LED de alta intensidad visibles a más de 300 metros de distancia.</li>
+            <li><strong>Almacenamiento Eficiente:</strong> Baterías recargables LiFePO4 para funcionamiento continuo de hasta 48 horas en días nublados.</li>
+        </ul>
+    </div>
+
+    <h2 class="section-title">Componentes Principales</h2>
+    <div class="cards-grid">
+        <div class="card">
+            <h3>Panel Solar Fotovoltaico</h3>
+            <p>Captura la radiación solar durante el día y la transforma en energía eléctrica para cargar la batería interna.</p>
+        </div>
+        <div class="card">
+            <h3>Batería Recargable LiFePO4</h3>
+            <p>Almacena la energía eléctrica recolectada garantizando energía durante la noche o mal clima.</p>
+        </div>
+        <div class="card">
+            <h3>Módulo LED de Alta Eficiencia</h3>
+            <p>Proporciona iluminación perimetral a la señalización con bajo consumo de energía y alta visibilidad nocturna.</p>
+        </div>
+        <div class="card">
+            <h3>Sensor Fotorresistor (LDR) / Control</h3>
+            <p>Detecta el nivel de luz ambiental para activar automáticamente la iluminación LED durante la noche.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('roadCanvas');
+    const ctx = canvas.getContext('2d');
+    const timeSlider = document.getElementById('timeSlider');
+    const timeLabel = document.getElementById('timeLabel');
+
+    let carX = -150;
+    const carSpeed = 3;
+
+    function drawScene() {
+        const nightVal = timeSlider.value / 100;
+        timeLabel.textContent = nightVal > 0.5 ? "Noche" : "Día";
+
+        // Fondo (Cielo)
+        const skyColorR = Math.round(135 * (1 - nightVal) + 10 * nightVal);
+        const skyColorG = Math.round(206 * (1 - nightVal) + 15 * nightVal);
+        const skyColorB = Math.round(235 * (1 - nightVal) + 30 * nightVal);
+        ctx.fillStyle = `rgb(${skyColorR}, ${skyColorG}, ${skyColorB})`;
+        ctx.fillRect(0, 0, canvas.width, 250);
+
+        // Carretera
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(0, 250, canvas.width, 150);
+
+        // Línea divisoria
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 4;
+        ctx.setLineDash([20, 20]);
+        ctx.beginPath();
+        ctx.moveTo(0, 325);
+        ctx.lineTo(canvas.width, 325);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Poste y Señal de Tránsito
+        ctx.fillStyle = "#64748b";
+        ctx.fillRect(550, 120, 10, 130);
+
+        // Señal Octagonal
+        ctx.fillStyle = "#dc2626";
+        ctx.beginPath();
+        ctx.arc(555, 120, 35, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Texto Señal
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("ALTO", 555, 126);
+
+        // Iluminación LED
+        if (nightVal > 0.3) {
+            ctx.strokeStyle = `rgba(0, 242, 254, ${nightVal})`;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(555, 120, 38, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.fillStyle = `rgba(0, 242, 254, ${nightVal * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(555, 120, 48, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Panel Solar
+        ctx.fillStyle = "#1e3a8a";
+        ctx.fillRect(530, 65, 50, 15);
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(530, 65, 50, 15);
+
+        // Auto
+        carX += carSpeed;
+        if (carX > canvas.width + 100) carX = -150;
+
+        // Faros
+        if (nightVal > 0.3) {
+            ctx.fillStyle = `rgba(254, 240, 138, ${nightVal * 0.5})`;
+            ctx.beginPath();
+            ctx.moveTo(carX + 110, 300);
+            ctx.lineTo(carX + 300, 270);
+            ctx.lineTo(carX + 300, 330);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Cuerpo del auto
+        ctx.fillStyle = "#2563eb";
+        ctx.fillRect(carX, 285, 110, 30);
+        ctx.fillRect(carX + 20, 265, 60, 20);
+
+        // Ruedas
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.arc(carX + 25, 315, 12, 0, Math.PI * 2);
+        ctx.arc(carX + 85, 315, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(drawScene);
+    }
+
+    drawScene();
+    timeSlider.addEventListener('input', drawScene);
+</script>
+
+</body>
+</html>
